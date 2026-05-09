@@ -7,7 +7,7 @@ services:
     ports:
       - "11434:11434"
     volumes:
-      - ./strorage/ollama:/root/.ollama
+      - ollama:/root/.ollama
       - ./service_start/entry.sh:/entry.sh:Z
     entrypoint: ["/bin/bash", "/entry.sh"]
     devices:
