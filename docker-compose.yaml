@@ -1,0 +1,26 @@
+services:
+  ollama:
+    image: ollama/ollama:rocm
+    #command: ollama run gemma4
+    container_name: ollama
+    restart: unless-stopped
+    ports:
+      - "11434:11434"
+    volumes:
+      - ./strorage/ollama:/root/.ollama
+      - ./service_start/entry.sh:/entry.sh:Z
+    entrypoint: ["/bin/bash", "/entry.sh"]
+    devices:
+      - /dev/kfd:/dev/kfd
+      - /dev/dri:/dev/dri
+    environment:
+      # Optional: Manual override for unsupported GPUs (e.g., RX 6000 series often use 10.3.0)
+      # - HSA_OVERRIDE_GFX_VERSION=10.3.0
+      - OLLAMA_HOST=0.0.0.0
+      # - OLLAMA_VULKAN=1
+      # - HTTP_PROXY=http://example.proxy.com:1234
+      # - HTTPS_Proxy=HTTP://example.proxy.com:1234
+
+volumes:
+  ollama:
+    name: ollama_data
