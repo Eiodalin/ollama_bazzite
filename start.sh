@@ -2,6 +2,12 @@
 
 brew install ansible
 ansible-playbook start_cfg.yaml -K
+cat  << EOF
+The BECOME password is your sudo password.
+Make sure you know what you are running here before typing a password.
+
+ANY commands run with sudo passwords should be contemplated.
+EOF
 podman compose up -d
 
 
