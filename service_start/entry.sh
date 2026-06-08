@@ -5,6 +5,6 @@
 sleep 5
 # Pull the specific model
 echo "Pulling model..."
-ollama pull gemma4:latest
+ollama pull gemma4:12b
 # Wait for the background process
 wait
