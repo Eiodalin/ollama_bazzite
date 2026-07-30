@@ -1,0 +1,25 @@
+services:
+  ollama:
+    image: ollama/ollama
+    #command: ollama run gemma4
+    container_name: ollama
+    restart: unless-stopped
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama:/root/.ollama
+      - ./service_start/entry.sh:/entry.sh:Z
+    entrypoint: ["/bin/bash", "/entry.sh"]
+    devices:
+      - nvidia.com/gpu=all
+    # security_opt:
+    #   - label=disable  # uncomment if Podman/SELinux blocks CDI device access
+    environment:
+      - OLLAMA_HOST=0.0.0.0
+      # - OLLAMA_VULKAN=1
+      # - HTTP_PROXY=http://example.proxy.com:1234
+      # - HTTPS_Proxy=HTTP://example.proxy.com:1234
+
+volumes:
+  ollama:
+    name: ollama_data

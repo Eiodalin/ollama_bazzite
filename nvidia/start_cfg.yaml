@@ -1,0 +1,45 @@
+---
+- hosts: localhost
+  become: true
+  become_method: sudo
+  gather_facts: true
+
+  tasks:
+    - name: Check if Bazzite
+      ansible.builtin.fail:
+        msg: You might want to try https://bazzite.gg/...
+      # while clearer i perfer the ansible_distribution variable...
+      when: ansible_facts["distribution"] != "Bazzite"
+
+    - name: Check for nvidia-smi
+      ansible.builtin.shell: which nvidia-smi
+      register: nvidia_smi_check
+      failed_when: false
+
+    - name: Fail if no Nvidia driver detected
+      ansible.builtin.fail:
+        msg: nvidia-smi was not found. Make sure you're on a Bazzite image with the Nvidia driver installed (see https://bazzite.gg/).
+      when: nvidia_smi_check.rc != 0
+
+    - name: Check for nvidia-ctk (nvidia-container-toolkit)
+      ansible.builtin.shell: which nvidia-ctk
+      register: nvidia_ctk_check
+      failed_when: false
+
+    - name: Fail if nvidia-container-toolkit is missing
+      ansible.builtin.fail:
+        msg: nvidia-ctk was not found. Install nvidia-container-toolkit before continuing.
+      when: nvidia_ctk_check.rc != 0
+
+    - name: Generate the CDI spec so Podman can see the GPU
+      ansible.builtin.shell: nvidia-ctk cdi generate --output=/etc/cdi/nvidia.yaml
+
+    - name: check for container_use_devices boolean
+      ansible.builtin.shell: getsebool container_use_devices
+      register: container_gpu_bool
+
+    - name: Allow containers to use host devices ( your Nvidia GPU )
+      ansible.builtin.shell: setsebool -P container_use_devices 1
+      when:
+        - container_gpu_bool.stdout is none
+        - container_gpu_bool.stdout == "container_use_devices --> off"

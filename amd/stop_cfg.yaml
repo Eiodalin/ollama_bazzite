@@ -1,0 +1,22 @@
+---
+- hosts: localhost
+  become: true
+  become_method: sudo
+  gather_facts: true
+
+  tasks:
+    - name: Check if Bazzite
+      ansible.builtin.fail:
+        msg: You might want to try https://bazzite.gg/...
+      # while clearer i perfer the ansible_distribution variable...
+      when: ansible_facts["distribution"] != "Bazzite"
+
+    - name: check for container_use_devices boolean
+      ansible.builtin.shell: getsebool container_use_devices
+      register: container_gpu_bool
+
+    - name: Allow containers to use /dev/dri ( your AMD Gpu )
+      ansible.builtin.shell: setsebool -P container_use_devices 0
+      when:
+        - container_gpu_bool.stdout is none
+        - container_gpu_bool.stdout == "container_use_devices --> on"
